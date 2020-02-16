@@ -1,4 +1,4 @@
-0service:
+service:
   name: sofiane-serverless-todo-app
 
 plugins:
