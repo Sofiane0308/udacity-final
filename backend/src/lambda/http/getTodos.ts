@@ -1,40 +1,28 @@
-import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import * as AWS from 'aws-sdk'
 import 'source-map-support/register'
-import { parseUserId } from '../../auth/utils'
+import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
+import * as middy from 'middy';
+import { cors } from 'middy/middlewares';
+import { getTodos } from '../../Logic/todos-controller';
+import { createLogger } from '../../utils/logger';
 
-const docClient = new AWS.DynamoDB.DocumentClient()
+const logger = createLogger('get-Todos-Handler');
 
-const todosTable = process.env.TODOS_TABLE
+const allHandler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent, ): Promise<APIGatewayProxyResult> => {
+  // TODO: Get all TODO items for a current user
 
-export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    
-    console.log("EVENT:", event);
+  logger.info('Get todos', event);
 
-    const authHeader = event.headers.Authorization
-    const authSplit = authHeader.split(" ")
-    const userId = parseUserId(authSplit[1])
-    
-    const result = await docClient.query({
-        TableName : todosTable,
-        IndexName: "UserIdIndex",
-        KeyConditionExpression: 'userId = :userId',
-        ExpressionAttributeValues: {
-            ':userId': userId
-        },
-  
-        ScanIndexForward: false
-    }).promise()
+  const authorization = event.headers.Authorization;
+  const split = authorization.split(' ');
+  const jwtToken = split[1];
 
-    const items = result.Items
+  const items = await getTodos(jwtToken);
 
-    return {
-        statusCode: 200,
-        headers: {
-            'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify({
-            items
-        })
-    }
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      items,
+    }),
+  };
 }
+export const handler = middy(allHandler).use(cors({ credentials: true }));

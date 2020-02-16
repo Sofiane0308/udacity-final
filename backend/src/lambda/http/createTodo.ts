@@ -1,45 +1,31 @@
-import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import * as AWS from 'aws-sdk'
 import 'source-map-support/register'
-import * as uuid from 'uuid'
-import { parseUserId } from '../../auth/utils'
+import * as middy from 'middy'
+import {cors} from 'middy/middlewares'
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import { CreateTodoRequest } from '../../requests/CreateTodoRequest';
+import { createTodo } from '../../Logic/todos-controller';
+import { createLogger } from '../../utils/logger';
 
-const docClient = new AWS.DynamoDB.DocumentClient()
+const logger = createLogger('create-Todo-Handler');
 
-const todosTable = process.env.TODOS_TABLE
+const createHandler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent,): Promise<APIGatewayProxyResult> => {
+  // TODO: Implement creating a new TODO item
+  
+  logger.info('new todo item', event);
 
-export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    
-    console.log("EVENT:", event);
+  const newTodo: CreateTodoRequest = JSON.parse(event.body);
+  const authorization = event.headers.Authorization;
+  const split = authorization.split(' ');
+  const jwtToken = split[1];
 
-    const todoId = uuid.v4()
+  const newItem = await createTodo(newTodo, jwtToken);
+  return {
+      statusCode: 201,
+      body: JSON.stringify({
+          newItem,
+      }),
+  };
+};
 
-    const parsedBody = JSON.parse(event.body)
-
-    const authHeader = event.headers.Authorization
-    const authSplit = authHeader.split(" ")
-    const token = authSplit[1]
-
-    console.log("test",token)
-
-    const item = {
-      todoId: todoId,
-        userId: parseUserId(token),
-        ...parsedBody
-    }
-
-    await docClient.put({
-        TableName: todosTable,
-        Item: item
-    }).promise()
-
-    return {
-        statusCode: 201,
-        headers: {
-            'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify({
-          item
-        })
-    }
-}
+export const handler = middy(createHandler).use(cors({ credentials: true }),);  
+ 
