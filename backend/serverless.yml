@@ -1,5 +1,5 @@
 0service:
-  name: ross-serverless-todo-app
+  name: sofiane-serverless-todo-app
 
 plugins:
   - serverless-webpack
@@ -10,12 +10,12 @@ provider:
   runtime: nodejs10.x
 
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-west-1'}
+  region: ${opt:region, 'us-east-2'}
 
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
-    AUTH_0_SECRET: z2JvJFPCw4F2SljDrRt2tQQIy9e3MArsWEYFv2MVpyTjO4b5DVjXhHqfewYvvjvg
-    S3_BUCKET: ross-serverless-todo-s3-${self:provider.stage}
+    AUTH_0_SECRET: 1ozwe5rW581tDHeosY5UlY8a4Tl2NhQmxT7-7mLNKgbwj3rypg5qumEtXRd-UO4V
+    S3_BUCKET: sofiane-serverless-todo-s3-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
 functions:
