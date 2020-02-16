@@ -34,7 +34,6 @@ xN8YaXAdomDJR4HZpXcJ5gCy3rT + 5PvfaCNZ / pKfF8RFbgr / VulmsjspglDLa6t0\
 4VaP + Pxcgr4AjEii2yxksGg=\
 ----- END CERTIFICATE-----'
 
-const authSecret = process.env.AUTH_0_SECRET
 
 export const handler = async (
   event: CustomAuthorizerEvent
