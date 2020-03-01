@@ -2,26 +2,26 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy';
 import { cors } from 'middy/middlewares';
-import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest';
-import { update } from '../../Logic/todos-controller';
+import { UpdateDocRequest } from '../../requests/UpdateDocRequest';
+import { update } from '../../Logic/docs-controller';
 import { createLogger } from '../../utils/logger';
 
-const logger = createLogger('update-Todo-Handler');
+const logger = createLogger('update-Doc-Handler');
 
 const updateHandler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent,): Promise<APIGatewayProxyResult> => {
-    logger.info('Update a todo', event);
+    logger.info('Update a doc', event);
 
-    const todoId = event.pathParameters.todoId;
-    const updatedTodo: UpdateTodoRequest = JSON.parse(event.body);
+    const docId = event.pathParameters.docId;
+    const updatedDoc: UpdateDocRequest = JSON.parse(event.body);
     const authorization = event.headers.Authorization;
     const split = authorization.split(' ');
     const jwtToken = split[1];
 
-    await update(todoId, updatedTodo, jwtToken);
+    await update(docId, updatedDoc, jwtToken);
 
     return {
         statusCode: 204,
-        body: 'todo updated',
+        body: 'doc updated',
     };
 };
 

@@ -1,6 +1,6 @@
-export interface TodoItem {
+export interface DocItem {
   userId: string
-  todoId: string
+  docId: string
   createdAt: string
   name: string
   dueDate: string

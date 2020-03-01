@@ -1,18 +1,18 @@
 import * as AWS from 'aws-sdk';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { TodoItem } from '../models/TodoItem';
-import { TodoUpdate } from '../models/TodoUpdate';
+import { DocItem } from '../models/DocItem';
+import { DocUpdate } from '../models/DocUpdate';
 
-export class TodoAccessDB {
+export class DocAccessDB {
   public constructor(
     private readonly documentClient: DocumentClient = new AWS.DynamoDB.DocumentClient(),
-    private readonly todos_Table = process.env.TODOS_TABLE,
+    private readonly docs_Table = process.env.DOCS_TABLE,
   ) { }
 
-  public async all(userId: string): Promise<TodoItem[]> {
+  public async all(userId: string): Promise<DocItem[]> {
     const result = await this.documentClient
       .query({
-        TableName: this.todos_Table,
+        TableName: this.docs_Table,
         KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
           ':userId': userId,
@@ -21,54 +21,54 @@ export class TodoAccessDB {
       .promise();
 
     const items = result.Items;
-    return items as TodoItem[];
+    return items as DocItem[];
   }
 
-  public async get(todoId: string, userId: string): Promise<TodoItem> {
+  public async get(docId: string, userId: string): Promise<DocItem> {
     const result = await this.documentClient
       .query({
-        TableName: this.todos_Table,
-        KeyConditionExpression: 'todoId = :todoId and userId = :userId',
+        TableName: this.docs_Table,
+        KeyConditionExpression: 'docId = :docId and userId = :userId',
         ExpressionAttributeValues: {
-          ':todoId': todoId,
+          ':docId': docId,
           ':userId': userId,
         },
       })
       .promise();
 
     const item = result.Items[0];
-    return item as TodoItem;
+    return item as DocItem;
   }
 
-  public async create(todoItem: TodoItem): Promise<TodoItem> {
+  public async create(docItem: DocItem): Promise<DocItem> {
     await this.documentClient
       .put({
-        TableName: this.todos_Table,
-        Item: todoItem,
+        TableName: this.docs_Table,
+        Item: docItem,
       })
       .promise();
 
-    return todoItem;
+    return docItem;
   }
 
   public async update(
-    todoId: string,
+    docId: string,
     createdAt: string,
-    todoUpdate: TodoUpdate,
+    docUpdate: DocUpdate,
   ): Promise<void> {
     this.documentClient
       .update({
-        TableName: this.todos_Table,
+        TableName: this.docs_Table,
         Key: {
-          todoId,
+          docId,
           createdAt,
         },
         UpdateExpression:
           'set #n = :name, done = :done, dueDate = :dueDate',
         ExpressionAttributeValues: {
-          ':name': todoUpdate.name,
-          ':done': todoUpdate.done,
-          ':dueDate': todoUpdate.dueDate,
+          ':name': docUpdate.name,
+          ':done': docUpdate.done,
+          ':dueDate': docUpdate.dueDate,
         },
         ExpressionAttributeNames: {
           '#n': 'name', 
@@ -79,15 +79,15 @@ export class TodoAccessDB {
   }
 
   public async setAttachmentUrl(
-    todoId: string,
+    docId: string,
     userId: string,
     attachmentUrl: string,
   ): Promise<void> {
     this.documentClient
       .update({
-        TableName: this.todos_Table,
+        TableName: this.docs_Table,
         Key: {
-          todoId,
+          docId,
           userId,
         },
         UpdateExpression: 'set attachmentUrl = :attachmentUrl',
@@ -99,13 +99,13 @@ export class TodoAccessDB {
       .promise();
   }
 
-  public async delete(todoId: string, userId: string): Promise<void> {
+  public async delete(docId: string, userId: string): Promise<void> {
     this.documentClient
       .delete({
-        TableName: this.todos_Table,
+        TableName: this.docs_Table,
         Key: {
           userId,
-          todoId,
+          docId,
         },
       })
       .promise();

@@ -2,23 +2,23 @@ import 'source-map-support/register'
 import * as middy from 'middy'
 import {cors} from 'middy/middlewares'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import { CreateTodoRequest } from '../../requests/CreateTodoRequest';
-import { createTodo } from '../../Logic/todos-controller';
+import { CreateDocRequest } from '../../requests/CreateDocRequest';
+import { createDoc } from '../../Logic/docs-controller';
 import { createLogger } from '../../utils/logger';
 
-const logger = createLogger('create-Todo-Handler');
+const logger = createLogger('create-Doc-Handler');
 
 const createHandler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent,): Promise<APIGatewayProxyResult> => {
-  // TODO: Implement creating a new TODO item
+  // DOC: Implement creating a new DOC item
   
-  logger.info('new todo item', event);
+  logger.info('new doc item', event);
 
-  const newTodo: CreateTodoRequest = JSON.parse(event.body);
+  const newDoc: CreateDocRequest = JSON.parse(event.body);
   const authorization = event.headers.Authorization;
   const split = authorization.split(' ');
   const jwtToken = split[1];
 
-  const newItem = await createTodo(newTodo, jwtToken);
+  const newItem = await createDoc(newDoc, jwtToken);
   return {
       statusCode: 201,
       body: JSON.stringify({

@@ -5,7 +5,7 @@ import * as uuid from 'uuid'
 import * as AWSXRay from 'aws-xray-sdk';
 import * as middy from 'middy';
 import { cors } from 'middy/middlewares';
-import { setAttachmentUrl } from '../../Logic/todos-controller';
+import { setAttachmentUrl } from '../../Logic/docs-controller';
 import { createLogger } from '../../utils/logger';
 
 const XAWS = AWSXRay.captureAWS(AWS);
@@ -18,18 +18,18 @@ const s3bucket = new XAWS.S3(options);
 
 
 const generateUploadUrlHandler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent, ): Promise<APIGatewayProxyResult> => {
-  // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
+  // DOC: Return a presigned URL to upload a file for a DOC item with the provided id
 
   logger.info('Generate url', event);
 
-  const todoId = event.pathParameters.todoId;
+  const docId = event.pathParameters.docId;
   const authorization = event.headers.Authorization;
   const split = authorization.split(' ');
   const jwtToken = split[1];
   const imgId = uuid.v4();
 
   setAttachmentUrl(
-    todoId,
+    docId,
     `https://${bucketName}.s3.amazonaws.com/${imgId}`,
     jwtToken,
   );
